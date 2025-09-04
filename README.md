@@ -85,3 +85,7 @@ npm install
 cd backend
 npm install
 ```
+
+## Architecture
+
+![alt text](image.png)
