@@ -3,11 +3,11 @@ import { Navbar as HeroUINavbar, NavbarBrand, NavbarContent } from "@heroui/navb
 
 export const Navbar = () => {
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
+    <HeroUINavbar maxWidth="xl" position="sticky" className="bg-gray-800  top-0 z-50 mb-1 ">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand className="gap-3 max-w-fit">
           <Link className="flex justify-start items-center gap-1" color="foreground" href="/">
-            <p className="font-bold text-inherit">Hunter Bot</p>
+            <p className="font-bold text-white">Hunter Bot</p>
           </Link>
         </NavbarBrand>
       </NavbarContent>

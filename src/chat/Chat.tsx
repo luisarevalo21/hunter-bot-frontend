@@ -4,20 +4,11 @@ import { Form, Input } from "@heroui/react";
 import api from "@/api";
 import Language from "@/components/language";
 interface ChatResponse {
-  action: "recommend" | "clarify";
-  ai_message: string;
-  services?: any[]; // Changed from [] to any[]
-  clarification_question?: string;
   response: string;
   intent: string;
 }
 
-interface ConversationMessage {
-  user: string;
-  bumi: string;
-}
-
-function Chat({ onClose }: { onClose?: () => void }) {
+function Chat() {
   const [response, setResponse] = useState<ChatResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDisabled, setIsDisabled] = useState(false);
@@ -55,17 +46,6 @@ function Chat({ onClose }: { onClose?: () => void }) {
   //     },
   //   ]);
 
-  //   // Also set a mock response for the intent badge
-  //   setResponse({
-  //     action: "recommend",
-  //     ai_message: "Found job matches",
-  //     response: "Job listings provided",
-  //     intent: "job_search",
-  //     services: [],
-  //   });
-  // }, []);
-
-  const services = response?.services ?? [];
   const showGreeting = !response;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -132,15 +112,23 @@ function Chat({ onClose }: { onClose?: () => void }) {
     }
   };
 
+  let headerText = "";
+  if (language === "es") {
+    headerText = "¿Cómo puedo ayudarte hoy?";
+  } else if (language === "zh") {
+    headerText = "今天我能为您做些什么？";
+  } else {
+    headerText = "How can I help you today?";
+  }
+
   return (
     <div className="max-w-xl mx-auto p-4 bg-gray-800 rounded-lg shadow-lg flex flex-col h-[800px]">
       <div className="mb-4 flex justify-center">
         <Language language={language} setLanguage={setLanguage} isDisabled={isDisabled} />
       </div>
+
       {showGreeting && conversation.length === 0 && (
-        <div className="text-white text-center text-xl font-semibold py-4">
-          {language === "es" ? `¿Cómo puedo ayudarte hoy?` : `How can I help you today?`}
-        </div>
+        <div className="text-white text-center text-xl font-semibold py-4">{headerText}</div>
       )}
 
       <div className="flex-grow overflow-y-auto mb-4 pr-2" style={{ scrollBehavior: "smooth" }}>
