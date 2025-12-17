@@ -21,6 +21,7 @@ function Chat() {
   const [language, setLanguage] = useState<string>("en");
 
   const [isTyping, setIsTyping] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>("");
 
   //testing pursposes
   // useEffect(() => {
@@ -60,6 +61,22 @@ function Chat() {
 
     try {
       setIsTyping(true);
+      setErrorMessage("");
+      setLoadingMessage(language === "es" ? "Conectando con el servidor..." : "Connecting to server...");
+
+      // First check if server is awake with a health check
+      try {
+        await api.get("/health", { timeout: 5000 });
+        setLoadingMessage(language === "es" ? "Procesando tu solicitud..." : "Processing your request...");
+      } catch (healthError) {
+        // Server might be sleeping, inform user
+        setLoadingMessage(
+          language === "es"
+            ? "El servidor está despertando, esto puede tomar 30-60 segundos..."
+            : "Server is waking up, this may take 30-60 seconds..."
+        );
+      }
+
       const chatResponse = await api.post("/api/openai/chat", {
         message: userMessage,
         conversation_history: conversation.map(item => ({
@@ -105,10 +122,35 @@ function Chat() {
       ]);
 
       setIsTyping(false);
-    } catch (error) {
+      setLoadingMessage("");
+      setIsDisabled(false);
+    } catch (error: any) {
       console.error("Error fetching chat response:", error);
-      setErrorMessage("Sorry, something went wrong. Please try again.");
+
+      // Provide helpful error messages based on the error type
+      if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
+        setErrorMessage(
+          language === "es"
+            ? "La solicitud tardó demasiado. El servidor gratuito puede estar despertando. Por favor, intenta de nuevo en un momento."
+            : "Request timed out. The free-tier server may be waking up. Please try again in a moment."
+        );
+      } else if (error.message.includes("Network Error")) {
+        setErrorMessage(
+          language === "es"
+            ? "Error de conexión. Por favor verifica tu conexión a internet e intenta de nuevo."
+            : "Connection error. Please check your internet connection and try again."
+        );
+      } else {
+        setErrorMessage(
+          language === "es"
+            ? "Algo salió mal. Por favor intenta de nuevo."
+            : "Sorry, something went wrong. Please try again."
+        );
+      }
+
       setIsTyping(false);
+      setLoadingMessage("");
+      setIsDisabled(false);
     }
   };
 
@@ -165,10 +207,11 @@ function Chat() {
               <div className="bg-gray-700 text-white p-3 rounded-lg rounded-bl-none">
                 <div className="flex items-center mb-1">
                   <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-2">
-                    <span className="text-white font-bold text-xs">B</span>
+                    <span className="text-white font-bold text-xs">HB</span>
                   </div>
                   <span className="text-xs text-gray-300">Hunter Bot</span>
                 </div>
+                {loadingMessage && <p className="text-sm text-yellow-300 mb-2 italic">{loadingMessage}</p>}
                 <div className="flex space-x-1">
                   <div
                     className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
